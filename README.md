@@ -4,11 +4,11 @@ Kof is a simple, terminal-based note-taking framework that leverages Git for ver
 
 ## Features
 
-- Terminal-Based: Manage your notes directly from the terminal.
-- Git Integration: Notes are versioned and can be tracked using Git.
-- Simple: simple -_-
-- Chronological: Journal entries are created and named after the current day.
-- Extra Memory: The `main.md`/`main.txt` file serves as your brain's RAM.
+- **Terminal-Based:** Manage your notes directly from the terminal.
+- **Git Integration:** Notes are versioned and can be tracked using Git.
+- **Simple:** simple -_-
+- **Chronological:** Journal entries are created and named after the current day.
+- **Extra Memory:** The `main.md`/`main.txt` file serves as your brain's RAM.
 
 ## Installation
 
@@ -43,9 +43,9 @@ The configuration file (~/.config/kof/config.txt) allows you to choose between M
 
 ### Planned Features
 
-- [ ] Sync Notes Between Computers: Add a --sync flag to allow users to sync their notes to a server they can self-host.
+- [ ] **Sync Notes Between Computers:** Add a --sync flag to allow users to sync their notes to a server they can self-host.
 
-- [ ] Terminal User Interface (TUI): Implement a TUI to create and manage notes with different categories.
+- [ ] **Terminal User Interface (TUI):** Implement a TUI to create and manage notes with different categories.
 
 ## Contributing
 
