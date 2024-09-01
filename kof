@@ -3,13 +3,13 @@
 commit_count_file="$HOME/.config/kof/commit_count"
 
 function getHelp() {
-    printf "Usage: kof [OPTION]"
-    printf "Create new entries into your journal or main file"
-
-    printf "Mandatory arguments to long options are mandatory for short options too."
-    printf "  -c, --create                make a new entry with timestamp into your daily file"
-    printf "  -m, --main                  make a new entry into your main file"
-    printf "  -h, --help         display this help and exit"
+    printf "Usage: kof [OPTION]...\n"
+    printf "Create new entries into your journal or main file\n"
+    printf "\n"
+    printf "Mandatory arguments to long options are mandatory for short options too.\n"
+    printf "  -c, --create                make a new entry with timestamp into your daily file\n"
+    printf "  -m, --main                  make a new entry into your main file\n"
+    printf "  -h, --help         display this help and exit\n"
 }
 
 function mainEntry() {
@@ -21,7 +21,7 @@ function mainEntry() {
 
     if [ -f "$main_file" ]; then
         ${EDITOR} "$main_file"
-        sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' "$journal_file"
+        sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' "$main_file"
         git add "$main_file"
         git commit -m "$main_file #$commit_count"
         git push
@@ -125,4 +125,4 @@ function main() {
     esac
 }
 
-main "$@"
+main $@

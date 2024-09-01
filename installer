@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source kof
+commit_count_file="$HOME/.config/kof/commit_count"
 
 # Make config file
 mkdir -p ~/.config/kof
@@ -21,10 +21,10 @@ if [ -d "$HOME/Documents" ]; then
             printf "Making a notes directory...\n"
             # Make git repo
             mkdir -p $HOME/.config/kof/repo/notes.git
-            cd $HOME/.config/kof/repo/notes.git && git init --bare
-            cd $HOME/Documents && git clone $HOME/.config/kof/repo/notes.git
-            touch "$HOME/Documents/notes/main.$file_extension"
+            git init --bare $HOME/.config/kof/repo/notes.git > /dev/null
+            pushd $HOME/Documents && git clone $HOME/.config/kof/repo/notes.git > /dev/null
             mkdir $HOME/Documents/notes/journal
+            pushd > /dev/null
         else
             printf "Backup failed. Original notes have not been deleted.\n"
             exit 1
@@ -32,22 +32,30 @@ if [ -d "$HOME/Documents" ]; then
     else
         printf "Making a notes directory...\n"
         mkdir -p $HOME/.config/kof/repo/notes.git
-        cd $HOME/.config/kof/repo/notes.git && git init --bare
-        cd $HOME/Documents && git clone $HOME/.config/kof/repo/notes.git
-        touch "$HOME/Documents/notes/main.$file_extension"
+        git init --bare $HOME/.config/kof/repo/notes.git > /dev/null
+        pushd $HOME/Documents && git clone $HOME/.config/kof/repo/notes.git > /dev/null
         mkdir $HOME/Documents/notes/journal
-        exit 1
+        pushd > /dev/null
     fi
 else
-    printf "Making a Documents directory..."
-    mkdir ~/Documents
+    printf "Making a Documents directory...\n"
+    mkdir $HOME/Documents
     printf "Documents directory created.\n"
+    printf "\n"
+    printf "Making a notes directory...\n"
+    # Make git repo
+    mkdir -p $HOME/.config/kof/repo/notes.git
+    git init --bare $HOME/.config/kof/repo/notes.git > /dev/null
+    pushd $HOME/Documents && git clone $HOME/.config/kof/repo/notes.git > /dev/null
+    mkdir $HOME/Documents/notes/journal
+    pushd > /dev/null
 fi
 
-install -m 755 kof /usr/local/bin/kof
+sudo install -m 755 kof /usr/local/bin/kof
 
+echo ""
 printf "Installation complete. You can now use 'kof' from the command line.\n"
-printf "However I recommend using aliases for a smoother experience.\n"
+echo ""
 read -p "Do you want to create aliases for 'kof --create' and 'kof --main'? (y/n): " create_aliases
 
 if [[ "$create_aliases" =~ ^[Yy]$ ]]; then
@@ -69,7 +77,9 @@ if [[ "$create_aliases" =~ ^[Yy]$ ]]; then
 
     source "$shell_config"
 
+    printf "\n"
     printf "Aliases created. You can now use 'create' to create entries in the journal and 'main' to create entries in the main file.\n"
 else
+    printf "\n"
     printf "Skipping alias creation.\n"
 fi
