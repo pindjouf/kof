@@ -1,0 +1,128 @@
+#!/usr/bin/env bash
+
+commit_count_file="$HOME/.config/kof/commit_count"
+
+function getHelp() {
+    printf "Usage: kof [OPTION]"
+    printf "Create new entries into your journal or main file"
+
+    printf "Mandatory arguments to long options are mandatory for short options too."
+    printf "  -c, --create                make a new entry with timestamp into your daily file"
+    printf "  -m, --main                  make a new entry into your main file"
+    printf "  -h, --help         display this help and exit"
+}
+
+function mainEntry() {
+    local main_file=~/Documents/notes/main."$file_extension"
+
+    cd ~/Documents/notes
+
+    local commit_count=$(cat "$commit_count_file" | grep "main" | awk '{print $2}')
+
+    if [ -f "$main_file" ]; then
+        ${EDITOR} "$main_file"
+        sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' "$journal_file"
+        git add "$main_file"
+        git commit -m "$main_file #$commit_count"
+        git push
+        commit_count=$((commit_count + 1))
+        sed -i "s/^create: .*/create: $commit_count/" "$commit_count_file"
+    else
+        echo "# Stuff to keep in mind" >> "$main_file"
+        echo "" >> "$main_file"
+        echo "## todo" >> "$main_file"
+        echo "" >> "$main_file"
+        echo "" >> "$main_file"
+        ${EDITOR} "$main_file"
+        sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' "$journal_file"
+        git add "$main_file"
+        git commit -m "creation of $journal_file"
+        git push
+    fi
+}
+
+function createEntry() {
+    local current_date=$(date +%F)
+    local current_year=$(date +%Y)
+    local current_month=$(date +%B | tr '[:upper:]' '[:lower:]')
+    local current_month_n=$(date +%m)
+    local current_time=$(date +%r)
+    local today=$(date '+%A %B %d')
+    local journal_file=~/Documents/notes/journal/"$current_year"/"$current_month_n"."$current_month"/"$current_date.$file_extension"
+
+    cd ~/Documents/notes/journal
+
+    local journal_dir=$(dirname "$journal_file")
+    if [ ! -d "$journal_dir" ]; then
+        mkdir -p "$journal_dir"
+    fi
+
+    local commit_count=$(cat "$commit_count_file" | grep "create" | awk '{print $2}')
+
+    if [ -f "$journal_file" ]; then
+        echo "" >> "$journal_file"
+        echo "## $current_time" >> "$journal_file"
+        echo "" >> "$journal_file"
+        echo "" >> "$journal_file"
+        ${EDITOR} "$journal_file"
+        sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' "$journal_file"
+        git add "$journal_file"
+        git commit -m "$journal_file #$commit_count"
+        commit_count=$((commit_count + 1))
+        sed -i "s/^create: .*/create: $commit_count/" "$commit_count_file"
+    else
+        echo "# $today" > "$journal_file"
+        echo "" >> "$journal_file"
+        echo "## $current_time" >> "$journal_file"
+        echo "" >> "$journal_file"
+        echo "" >> "$journal_file"
+        ${EDITOR} "$journal_file"
+        sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' "$journal_file"
+        git add "$journal_file"
+        git commit -m "creation of $journal_file"
+        git push
+    fi
+}
+
+function main() {
+    # Check config
+    if [ -d "$HOME/.config/kof" ]; then
+        config_file="$HOME/.config/kof/config.txt"
+        if [ -f "$config_file" ] && [ -s "$config_file" ]; then
+            file_extension=$(grep "file_extension" "$config_file" | awk '{print $3}' "$config_file")
+        else
+            printf "To use kof you need to set up your config file in $HOME/.config/kof/"
+            exit 1
+        fi
+    else
+        printf "To use kof you need to set up your config file in $HOME/.config/kof/"
+        exit 1
+    fi
+
+    # Handle arguments
+    if [ "$#" -eq 0 ]; then
+        printf "kof: cannot use kof without arguments.\n"
+        printf "Try 'kof --help' for more information.\n"
+        exit 1
+    elif [ "$#" -ge 2 ]; then
+        printf "kof: you've passed too many arguments.\n"
+        printf "Try 'kof --help' for more information.\n"
+        exit 1
+    fi
+
+    case "$1" in
+        --create|-c) createEntry
+        ;;
+        --main|-m) mainEntry
+        ;;
+        --help|-h) getHelp
+        ;;
+        *)
+            printf "kof: invalid option -- '%s'\n" "$1"
+            printf "Try 'kof --help' for more information.\n"
+            exit 1
+        ;;
+    esac
+}
+
+main "$@"

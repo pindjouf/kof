@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+
+source kof
+
+# Make config file
+mkdir -p ~/.config/kof
+echo "file_extension = md" > ~/.config/kof/config.txt
+
+# Make commit counter
+echo "main: 0" > "$commit_count_file"
+echo "create: 0" >> "$commit_count_file"
+
+# Prepare main file structure
+if [ -d "$HOME/Documents" ]; then
+    if [ -d "$HOME/Documents/notes" ]; then
+        printf "Making a backup of your existing notes...\n"
+        mkdir "$HOME/notes_backup"
+        cp -r "$HOME/Documents/notes" "$HOME/notes_backup" 
+        if [ "$?" -eq 0 ]; then
+            rm -r "$HOME/Documents/notes"
+            printf "Making a notes directory...\n"
+            # Make git repo
+            mkdir -p $HOME/.config/kof/repo/notes.git
+            cd $HOME/.config/kof/repo/notes.git && git init --bare
+            cd $HOME/Documents && git clone $HOME/.config/kof/repo/notes.git
+            touch "$HOME/Documents/notes/main.$file_extension"
+            mkdir $HOME/Documents/notes/journal
+        else
+            printf "Backup failed. Original notes have not been deleted.\n"
+            exit 1
+        fi
+    else
+        printf "Making a notes directory...\n"
+        mkdir -p $HOME/.config/kof/repo/notes.git
+        cd $HOME/.config/kof/repo/notes.git && git init --bare
+        cd $HOME/Documents && git clone $HOME/.config/kof/repo/notes.git
+        touch "$HOME/Documents/notes/main.$file_extension"
+        mkdir $HOME/Documents/notes/journal
+        exit 1
+    fi
+else
+    printf "Making a Documents directory..."
+    mkdir ~/Documents
+    printf "Documents directory created.\n"
+fi
+
+install -m 755 kof /usr/local/bin/kof
+
+printf "Installation complete. You can now use 'kof' from the command line.\n"
+printf "However I recommend using aliases for a smoother experience.\n"
+read -p "Do you want to create aliases for 'kof --create' and 'kof --main'? (y/n): " create_aliases
+
+if [[ "$create_aliases" =~ ^[Yy]$ ]]; then
+
+    shell_config=""
+    if [ -n "$ZSH_VERSION" ]; then
+        shell_config="$HOME/.zshrc"
+    elif [ -n "$BASH_VERSION" ]; then
+        shell_config="$HOME/.bashrc"
+    else
+        printf "Could not determine your shell. Please manually add the following aliases:\n"
+        echo "alias create='kof --create'"
+        echo "alias main='kof --main'"
+        exit 1
+    fi
+
+    echo "alias create='kof --create'" >> "$shell_config"
+    echo "alias main='kof --main'" >> "$shell_config"
+
+    source "$shell_config"
+
+    printf "Aliases created. You can now use 'create' to create entries in the journal and 'main' to create entries in the main file.\n"
+else
+    printf "Skipping alias creation.\n"
+fi
