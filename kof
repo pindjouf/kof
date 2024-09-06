@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 repo="$HOME/.config/kof/repo/notes.git"
-commit_count_file="$HOME/.config/kof/commit_count"
+commit_count_file="$HOME/.config/kof/commit_count.txt"
 
 function getHelp() {
     printf "Usage: kof [OPTION]...\n"
