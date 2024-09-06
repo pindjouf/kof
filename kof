@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+repo="$HOME/.config/kof/repo/notes.git"
 commit_count_file="$HOME/.config/kof/commit_count"
 
 function getHelp() {
@@ -9,7 +10,63 @@ function getHelp() {
     printf "Mandatory arguments to long options are mandatory for short options too.\n"
     printf "  -c, --create                make a new entry with timestamp into your daily file\n"
     printf "  -m, --main                  make a new entry into your main file\n"
+    printf "  -s, --sync                  export your repo to your server\n"
     printf "  -h, --help         display this help and exit\n"
+}
+
+function joinBy { 
+    local IFS="$1"; shift;
+}
+
+function formatAddress(string) {
+    IFS='.' read -a split_address <<< "$string"
+    local result=0
+    if [[ "${#split_address[@]}" -ne 4 ]]; then
+        exit 1
+    fi
+    for ((i=0; i <= 3; i++)); do
+        if [[ "${split_address[i]}" -lt 0 || "${split_address[i]}" -gt 255 ]]; then
+            exit 1
+        fi
+    done
+    result=$(joinBy . "${split_address[@]}")
+    return "$result"
+}
+
+function syncRepo() {
+    read -p "Enter your server's user: " user
+    read -p "Enter your server's IP: " ip
+
+    local ip=$(formatAddress "$ip")
+    local remote_host="$user@$ip"
+    local notes_dir="$HOME/Documents/notes"
+
+    printf "Starting the sync process...\n"
+
+    if [[ -d "$repo" ]]; then
+        printf "Syncing directory $repo to $remote_host...\n"
+        scp -r "$repo" "$remote_host":
+        if [[ "$?" -ne 0 ]]; then
+            printf "Error: Failed to transfer directory.\n"
+            exit 1
+        else
+            printf "Successfully transferred directory. Removing local copy...\n"
+            sudo rm -r "$repo"
+        fi
+    fi
+
+    if [[ -d "$notes_dir" ]]; then
+        printf "Backing up existing notes directory...\n"
+        mkdir "$HOME/notes_repo_backup"
+        cp -r "$HOME/Documents/notes" "$HOME/notes_repo_backup"; sudo rm -r "$HOME/Documents/notes"
+        printf "Cloning notes repository from server...\n"
+        git clone "$remote_host":notes.git "$HOME/Documents/notes"
+    else
+        printf "Cloning notes repository from server...\n"
+        git clone "$remote_host":notes.git "$HOME/Documents/notes"
+    fi
+
+    printf "Sync process completed successfully!\n"
 }
 
 function mainEntry() {
@@ -21,12 +78,12 @@ function mainEntry() {
 
     if [ -f "$main_file" ]; then
         ${EDITOR} "$main_file"
-        sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' "$main_file"
-        git add "$main_file"
-        git commit -m "$main_file #$commit_count"
-        git push
+        sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' "$main_file" > /dev/null
+        git add "$main_file" > /dev/null
+        git commit -m "$main_file #$commit_count" > /dev/null
+        git push > /dev/null
         commit_count=$((commit_count + 1))
-        sed -i "s/^create: .*/create: $commit_count/" "$commit_count_file"
+        sed -i "s/^create: .*/create: $commit_count/" "$commit_count_file" > /dev/null
     else
         echo "# Stuff to keep in mind" >> "$main_file"
         echo "" >> "$main_file"
@@ -35,9 +92,9 @@ function mainEntry() {
         echo "" >> "$main_file"
         ${EDITOR} "$main_file"
         sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' "$journal_file"
-        git add "$main_file"
-        git commit -m "creation of $journal_file"
-        git push
+        git add "$main_file" > /dev/null
+        git commit -m "creation of $journal_file" > /dev/null
+        git push > /dev/null
     fi
 }
 
@@ -65,11 +122,11 @@ function createEntry() {
         echo "" >> "$journal_file"
         echo "" >> "$journal_file"
         ${EDITOR} "$journal_file"
-        sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' "$journal_file"
-        git add "$journal_file"
-        git commit -m "$journal_file #$commit_count"
+        sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' "$journal_file" > /dev/null
+        git add "$journal_file" > /dev/null
+        git commit -m "$journal_file #$commit_count" > /dev/null
         commit_count=$((commit_count + 1))
-        sed -i "s/^create: .*/create: $commit_count/" "$commit_count_file"
+        sed -i "s/^create: .*/create: $commit_count/" "$commit_count_file" > /dev/null
     else
         echo "# $today" > "$journal_file"
         echo "" >> "$journal_file"
@@ -77,10 +134,10 @@ function createEntry() {
         echo "" >> "$journal_file"
         echo "" >> "$journal_file"
         ${EDITOR} "$journal_file"
-        sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' "$journal_file"
-        git add "$journal_file"
-        git commit -m "creation of $journal_file"
-        git push
+        sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' "$journal_file" > /dev/null
+        git add "$journal_file" > /dev/null
+        git commit -m "creation of $journal_file" > /dev/null
+        git push > /dev/null
     fi
 }
 
@@ -116,6 +173,8 @@ function main() {
         --main|-m) mainEntry
         ;;
         --help|-h) getHelp
+        ;;
+        --sync|-s) syncRepo
         ;;
         *)
             printf "kof: invalid option -- '%s'\n" "$1"
