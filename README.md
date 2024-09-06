@@ -1,5 +1,5 @@
 # Kof - A Git-Based Note-Taking Framework
-
+ 
 Kof is a simple, terminal-based note-taking framework that leverages Git for version control. Designed for simplicity and ease of use, Kof allows you to keep your notes organized and versioned with minimal fuss.
 
 ## Features
@@ -9,6 +9,8 @@ Kof is a simple, terminal-based note-taking framework that leverages Git for ver
 - **Simple:** simple -_-
 - **Chronological:** Journal entries are created and named after the current day.
 - **Extra Memory:** The `main.md`/`main.txt` file serves as your brain's RAM.
+- **Sync Notes Between Computers:** Self-host your notes repository on a server and sync across multiple devices using the `--sync` flag.
+- **Customizable:** Customizable: Choose between Markdown and plain text files for your notes via the configuration file.
 
 ## Installation
 
@@ -39,11 +41,13 @@ The configuration file (~/.config/kof/config.txt) allows you to choose between M
 
 - **Main Entry:** Access the main note with the `main` command.
 
+- **Sync Notes:** You can sync your notes across multiple devices by self-hosting your repository on a server. Use the `--sync` flag to export your local repository to a server.
+
 ## Roadmap
 
 ### Planned Features
 
-- [ ] **Sync Notes Between Computers:** Add a --sync flag to allow users to sync their notes to a server they can self-host.
+- [x] **Sync Notes Between Computers:** Add a --sync flag to allow users to sync their notes to a server they can self-host.
 
 - [ ] **Terminal User Interface (TUI):** Implement a TUI to create and manage notes with different categories.
 
