@@ -132,4 +132,11 @@ function syncRepo() {
 
 if [[ "$syncit" =~ ^[Yy]$ ]]; then
     syncRepo
+    printf "\n"
+    printf "Aliases created. You can now use 'create' to create entries in the journal and 'main' to create entries in the main file.\n"
+    printf "\n"
+else
+    printf "\n"
+    printf "Skipping alias creation.\n"
+    printf "\n"
 fi
