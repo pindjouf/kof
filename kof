@@ -22,6 +22,7 @@ function formatAddress(string) {
     IFS='.' read -a split_address <<< "$string"
     local result=0
     if [[ "${#split_address[@]}" -ne 4 ]]; then
+        printf "Error: Your IP format is not correct, it should be four octets separated by dots."
         exit 1
     fi
     for ((i=0; i <= 3; i++)); do
@@ -148,11 +149,11 @@ function main() {
         if [ -f "$config_file" ] && [ -s "$config_file" ]; then
             file_extension=$(grep "file_extension" "$config_file" | awk '{print $3}' "$config_file")
         else
-            printf "To use kof you need to set up your config file in $HOME/.config/kof/"
+            printf "Error: To use kof you need to set up your config file in $HOME/.config/kof/"
             exit 1
         fi
     else
-        printf "To use kof you need to set up your config file in $HOME/.config/kof/"
+        printf "Error: To use kof you need to set up your config file in $HOME/.config/kof/"
         exit 1
     fi
 
