@@ -3,7 +3,8 @@ use std::{
     path::PathBuf,
     env::var,
     process::Command,
-    fs::OpenOptions,
+    fs::{OpenOptions, File},
+    io::Write,
 };
 
 #[derive(Parser, Debug)]
@@ -19,15 +20,15 @@ struct Args {
 fn main() {
     let args = Args::parse();
    
-    match (args.main, args.create) {
+    let _ = match (args.main, args.create) {
         (true, false) => main_entry(),
-        (false, true) => println!("You chose the --create flag"),
-        (false, false) => println!("You didn't use any flags try --help"),
-        _ => (),
-    }
+        //(false, true) => println!("You chose the --create flag"),
+        //(false, false) => println!("You didn't use any flags try --help"),
+        _ => todo!(),
+    };
 }
 
-fn main_entry() {
+fn main_entry() -> Result<(), Box<dyn std::error::Error>> {
     let editor = var("EDITOR").unwrap();
 
     let mut tmp_path: PathBuf = dirs::home_dir().expect("Can't find your home directory.");
@@ -40,12 +41,19 @@ fn main_entry() {
         .expect("Path has invalid stuff!")
         .to_string();
     
-    let _ = OpenOptions::new()
+    let file = OpenOptions::new()
         .write(true)
         .create(true)
-        .open(&path);
+        .open(&path)?;
+
+    if file.metadata()?.len() == 0 {
+        let mut file = File::create(&path)?;
+        writeln!(file, "# Things to keep in mind\n\n")?;
+    }
 
     Command::new(editor).arg(&path).status().expect("Something went wrong");
+
+    Ok(())
 }
 
 //fn create_entry() {
