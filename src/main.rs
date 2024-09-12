@@ -1,5 +1,9 @@
 use clap::Parser;
-use std::fs;
+use std::{
+    path::PathBuf,
+    env::var,
+    process::Command,
+};
 
 #[derive(Parser, Debug)]
 #[command(version, about)]
@@ -22,9 +26,18 @@ fn main() {
     }
 }
 
-fn main_entry() -> usize {
-    let path = "~/Documents/notes/main_1.md";
-    let main_file: String = fs::read_to_string(path);
-    println!("{}", main_file);
-    "usize" ;
+fn main_entry() {
+    let editor = var("EDITOR").unwrap();
+
+    let mut tmp_path: PathBuf = dirs::home_dir().expect("Can't find your home directory.");
+    tmp_path.push("Documents");
+    tmp_path.push("notes");
+    tmp_path.push("main_1.md");
+
+    let path = tmp_path.to_str().expect("Path has invalid stuff!").to_string();
+
+    Command::new(editor) 
+        .arg(path)
+        .status()
+        .expect("Something went wrong");
 }

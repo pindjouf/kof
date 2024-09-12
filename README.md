@@ -1,6 +1,12 @@
-# Kof - A Git-Based Note-Taking Framework
- 
+# Kof - Version controlled note management for the terminal
+
+## What it is
+
 Kof is a simple, terminal-based note-taking framework that leverages Git for version control. Designed for simplicity and ease of use, Kof allows you to keep your notes organized and versioned with minimal fuss.
+
+## Why it is
+
+I've always found that browsing through countless directories to find a note is inefficient and tiresome. The more inaccessible a note becomes, the less likely I am to write. Kof fixes this by offering two simple commands that speed up the connection between you and your notes.
 
 ## Features
 
