@@ -18,24 +18,36 @@ struct Args {
     main: bool,
 }
 
-const editor: String = var("EDITOR").unwrap();
+#[derive(Debug)]
+struct Config {
+    editor: String
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Config {
+            editor: var("EDITOR").unwrap_or_else(|_| "nano".to_string()),
+        }
+    }
+}
 
 fn main() {
     let args = Args::parse();
+    let config = Config::default();
    
     let _ = match (args.main, args.create) {
-        (true, false) => main_entry(),
+        (true, false) => main_entry(&config),
         //(false, true) => create_entry(),
         //(false, false) => println!("You didn't use any flags try --help"),
         _ => todo!(),
     };
 }
 
-fn main_entry() -> Result<(), Box<dyn std::error::Error>> {
+fn main_entry(config: &Config) -> Result<(), Box<dyn std::error::Error>> {
     let mut tmp_path: PathBuf = dirs::home_dir().expect("Can't find your home directory.");
-    tmp_path.push("Documents_1");
-    tmp_path.push("notes_1");
-    tmp_path.push("main_1.md");
+        tmp_path.push("Documents_1");
+        tmp_path.push("notes_1");
+        tmp_path.push("main_1.md");
 
     let path = tmp_path
         .to_str()
@@ -52,7 +64,10 @@ fn main_entry() -> Result<(), Box<dyn std::error::Error>> {
         writeln!(file, "# Things to keep in mind\n\n")?;
     }
 
-    Command::new(editor).arg(&path).status().expect("Something went wrong");
+    Command::new(&config.editor)
+        .arg(&path)
+        .status()
+        .expect("Something went wrong");
 
     Ok(())
 }
@@ -79,6 +94,6 @@ fn main_entry() -> Result<(), Box<dyn std::error::Error>> {
 //    Ok(())
 //}
 
-//fn list() -> Result<(), Box<dyn std::error::Error>> {
+//fn fzf() -> Result<(), Box<dyn std::error::Error>> {
 //
 //}
