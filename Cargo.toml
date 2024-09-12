@@ -7,7 +7,9 @@ description = "A Git-Based Note Management System"
 edition = "2021"
 
 [dependencies]
+chrono = "0.4.38"
 clap = { version = "4.5.17", features = ["derive"] }
 dirs = "5.0.1"
 open-file = "0.1.0"
 patharg = "0.4.0"
+regex = "1.10.6"
