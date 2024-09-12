@@ -3,6 +3,7 @@ use std::{
     path::PathBuf,
     env::var,
     process::Command,
+    fs::OpenOptions,
 };
 
 #[derive(Parser, Debug)]
@@ -34,10 +35,19 @@ fn main_entry() {
     tmp_path.push("notes");
     tmp_path.push("main_1.md");
 
-    let path = tmp_path.to_str().expect("Path has invalid stuff!").to_string();
+    let path = tmp_path
+        .to_str()
+        .expect("Path has invalid stuff!")
+        .to_string();
+    
+    let _ = OpenOptions::new()
+        .write(true)
+        .create(true)
+        .open(&path);
 
-    Command::new(editor) 
-        .arg(path)
-        .status()
-        .expect("Something went wrong");
+    Command::new(editor).arg(&path).status().expect("Something went wrong");
 }
+
+//fn create_entry() {
+//
+//}
