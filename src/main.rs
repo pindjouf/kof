@@ -5,6 +5,7 @@ use std::io::Cursor;
 use skim::prelude::*;
 use chrono;
 use std::{
+    fs,
     path::{PathBuf, Path},
     env::var,
     process::Command,
@@ -97,15 +98,32 @@ fn create_entry(config: &Config) -> Result<(), Box<dyn std::error::Error>> {
         .to_string()
         .to_owned();
 
+    let year: String = chrono::offset::Local::now()
+        .format("%Y")
+        .to_string()
+        .to_owned();
+
+    let month: String = chrono::offset::Local::now()
+        .format("%B")
+        .to_string()
+        .to_lowercase()
+        .to_owned();
+
+    let month_n: String = chrono::offset::Local::now()
+        .format("%m")
+        .to_string()
+        .to_owned();
+
     let mut tmp_path: PathBuf = dirs::home_dir().expect("Can't find your home directory.");
         tmp_path.push(&config.notes_dir);
-        tmp_path.push("journal/");
-        tmp_path.push(file);
+        tmp_path.push("journal");
+        tmp_path.push(format!("{}/{}.{}/{}", year, month_n, month, file));
 
-    let path = tmp_path
-        .to_str()
-        .expect("Path has invalid stuff!")
-        .to_string();
+    let path = tmp_path.to_str().expect("Path has invalid stuff!").to_string();
+
+    if let Some(parent) = Path::new(&path).parent() {
+        fs::create_dir_all(parent)?;
+    }
 
     match Path::new(&path).exists() {
         true => {
