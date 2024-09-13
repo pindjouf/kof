@@ -144,9 +144,20 @@ fn find(config: &Config) -> Result<(), Box<dyn std::error::Error>> {
     let item_reader = SkimItemReader::default();
     let items = item_reader.of_bufread(Cursor::new(files.join("\n")));
 
-    let selected_items = Skim::run_with(&options, Some(items))
-        .map(|out| out.selected_items)
-        .unwrap_or_else(Vec::new);
+    let skim_output = match Skim::run_with(&options, Some(items)) {
+        Some(output) => output,
+        None => return Ok(()),
+    };
+
+    if skim_output.is_abort {
+        return Ok(());
+    }
+
+    let selected_items = skim_output.selected_items;
+
+    if selected_items.is_empty() {
+        return Ok(());
+    }
 
     for item in selected_items.iter() {
         let output: &str = &item.output().to_string();
@@ -156,7 +167,7 @@ fn find(config: &Config) -> Result<(), Box<dyn std::error::Error>> {
         Command::new(&config.editor)
             .arg(&notes_dir)
             .status()
-            .expect("Can't open your editor");
+            .expect("Can't open your editor!");
     }
 
     Ok(())
