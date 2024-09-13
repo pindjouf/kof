@@ -1,4 +1,8 @@
 use clap::Parser;
+use std::ffi::OsStr;
+use walkdir::WalkDir;
+use std::io::Cursor;
+use skim::prelude::*;
 use chrono;
 use std::{
     path::{PathBuf, Path},
@@ -16,6 +20,9 @@ struct Args {
 
     #[arg(short, long)]
     main: bool,
+
+    #[arg(short, long)]
+    find: bool,
 }
 
 #[derive(Debug)]
@@ -37,10 +44,10 @@ fn main() {
     let args = Args::parse();
     let config = Config::default();
    
-    let _ = match (args.main, args.create) {
-        (true, false) => main_entry(&config),
-        (false, true) => create_entry(&config),
-        //(false, false) => println!("You didn't use any flags try --help"),
+    let _ = match (args.main, args.create, args.find) {
+        (true, false, false) => main_entry(&config),
+        (false, true, false) => create_entry(&config),
+        (false, false, true) => find(&config),
         _ => todo!(),
     };
 }
@@ -121,6 +128,36 @@ fn create_entry(config: &Config) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-//fn fzf() -> Result<(), Box<dyn std::error::Error>> {
-//
-//}
+fn find(config: &Config) -> Result<(), Box<dyn std::error::Error>> {
+    let mut notes_dir = dirs::home_dir().expect("Can't find your home directory");
+    notes_dir.push(&config.notes_dir);
+
+    let options = SkimOptions::default();
+
+    let files: Vec<String> = WalkDir::new(&notes_dir)
+        .into_iter()
+        .filter_map(|entry| entry.ok())
+        .filter(|entry| entry.file_type().is_file())
+        .map(|entry| entry.path().strip_prefix(&notes_dir).unwrap().to_string_lossy().into_owned())
+        .collect();
+
+    let item_reader = SkimItemReader::default();
+    let items = item_reader.of_bufread(Cursor::new(files.join("\n")));
+
+    let selected_items = Skim::run_with(&options, Some(items))
+        .map(|out| out.selected_items)
+        .unwrap_or_else(Vec::new);
+
+    for item in selected_items.iter() {
+        let output: &str = &item.output().to_string();
+        let chosen_file: &OsStr = OsStr::new(output);
+        notes_dir.push(chosen_file);
+
+        Command::new(&config.editor)
+            .arg(&notes_dir)
+            .status()
+            .expect("Can't open your editor");
+    }
+
+    Ok(())
+}
