@@ -48,8 +48,8 @@ fn main() {
     home.push(&config.notes_dir);
 
     let _: Command = match Path::new(&home).exists() {
-        true => todo!(),
-        false => Command::new("mkdir -p $HOME/Documents_1/notes_1"),
+        true => Command::new("command"),
+        false => Command::new("mkdir -p $HOME/Documents_1/notes_1;"),
     };
    
     let _ = match (args.main, args.create, args.find) {
