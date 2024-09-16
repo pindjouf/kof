@@ -56,7 +56,7 @@ fn main() {
         (true, false, false) => main_entry(&config),
         (false, true, false) => create_entry(&config),
         (false, false, true) => find(&config),
-        _ => todo!(),
+        _ => help(),
     };
 }
 
@@ -194,6 +194,48 @@ fn find(config: &Config) -> Result<(), Box<dyn std::error::Error>> {
             .status()
             .expect("Can't open your editor!");
     }
+
+    Ok(())
+}
+
+fn help() -> Result<(), Box<dyn std::error::Error>> {
+    let ascii_art = "
+  _          __ 
+ | | _____  / _|
+ | |/ / _ \\| |_ 
+ |   < (_) |  _|
+ |_|\\_\\___/|_|  
+                ";
+
+    let help_message = format!(
+        "{}\n\n{} {}\n\n{}\n    {}    {}\n    {}      {}\n    {}      {}\n    {}      {}\n    {}      {}\n\n{}\n    {}        {}\n    {}        {}\n    {}        {}\n\n{}\n    {}          {}",
+        ascii_art,
+        "\x1b[1mUsage:\x1b[0m", // Bold
+        "notes [OPTIONS]",
+        "\x1b[1mOptions:\x1b[0m", // Bold
+        "-c, --create",
+        "Create a new note for today in the journal",
+        "-m, --main",
+        "Open the main notes file",
+        "-f, --find",
+        "Search and find notes interactively",
+        "-h, --help",
+        "Print help",
+        "-V, --version",
+        "Print version",
+        "\x1b[1mExamples:\x1b[0m", // Bold
+        "notes -m",
+        "Opens the main notes file",
+        "notes -c",
+        "Creates a new journal entry for today",
+        "notes -f",
+        "Find and open existing notes",
+        "\x1b[1mEnvironment:\x1b[0m", // Bold
+        "EDITOR",
+        "Specify the text editor to use (default: nano)"
+    );
+
+    println!("{}", help_message);
 
     Ok(())
 }
