@@ -239,3 +239,11 @@ fn help() -> Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
+
+fn sync(config: &Config) -> Result<(), Box<dyn std::error::Error>> {
+    let path = Path::new("")
+    if condition {
+        todo!();
+    }
+    Ok(())
+}
