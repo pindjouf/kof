@@ -1,7 +1,7 @@
 # Kof - Version controlled note management for the terminal
 
 ![Rust](https://img.shields.io/badge/language-Rust-blue?style=flat-square)
-![Version](https://img.shields.io/badge/version-0.2.0-orange?style=flat-square)
+![Version](https://img.shields.io/badge/version-0.1.3-orange?style=flat-square)
 
 Kof is a simple, terminal-based, Git-powered note management system. The core idea behind Kof is to help users reorganize their thoughts through writing. With `main.md` as your brain's RAM, Kof provides an efficient, streamlined way to manage notes via Git.
 
